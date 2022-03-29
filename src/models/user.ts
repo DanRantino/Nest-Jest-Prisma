@@ -13,4 +13,5 @@ export interface IUserR {
 export interface IUserApiResp {
   data: IUserR | IUserR[] | null;
   err?: { hasError: boolean; errorMessage: string };
+  header?: string;
 }

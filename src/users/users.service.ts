@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IUserS, IUserApiResp } from 'src/models/user';
+import { IUserS, IUserApiResp } from '../models/user';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { generateToken } from '../utils/jwt';
 
 @Injectable()
 export class UsersService {
@@ -50,7 +51,14 @@ export class UsersService {
       },
     });
     if (await bcrypt.compare(userData.password, user.password)) {
-      return { data: user };
+      const res = {
+        id: user.id,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        userName: user.userName,
+      };
+      const header = await generateToken(res);
+      return { header, data: res };
     } else {
       return {
         data: null,

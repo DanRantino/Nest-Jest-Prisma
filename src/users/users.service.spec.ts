@@ -41,17 +41,24 @@ describe('UsersService', () => {
   it('should create a user but return the user without the password', async () => {
     const { data: test } = await service.createUser({
       password: 'test123',
-      userName: 'tester',
+      userName: 'tester1',
     });
     expect(test).toHaveProperty('userName');
     expect(test).toHaveProperty('id');
     expect(test).toHaveProperty('createdAt');
     expect(test).toHaveProperty('updatedAt');
     expect(test).not.toHaveProperty('password');
-    await prisma.user.delete({
-      where: {
-        userName: 'tester',
-      },
+  });
+  it('should return an password error', async () => {
+    const createdUser = await service.createUser({
+      password: 'test1234',
+      userName: 'tester235',
     });
+    const user = await service.login({
+      password: 'test12345',
+      userName: 'tester235',
+    });
+    expect(user.err.hasError).toBe(true);
+    expect(user.err).toHaveProperty('errorMessage');
   });
 });

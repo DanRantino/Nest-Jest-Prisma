@@ -26,6 +26,9 @@ export class UsersController {
     if (response.err?.hasError) {
       return res.status(401).json(response);
     }
-    return res.status(200).json(response);
+    return res
+      .setHeader('authorization', `Bearer ${response.header}`)
+      .status(200)
+      .json({ data: response.data, err: { ...response.err } });
   }
 }
