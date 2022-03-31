@@ -49,16 +49,4 @@ describe('UsersService', () => {
     expect(test).toHaveProperty('updatedAt');
     expect(test).not.toHaveProperty('password');
   });
-  it('should return an password error', async () => {
-    const createdUser = await service.createUser({
-      password: 'test1234',
-      userName: 'tester235',
-    });
-    const user = await service.login({
-      password: 'test12345',
-      userName: 'tester235',
-    });
-    expect(user.err.hasError).toBe(true);
-    expect(user.err).toHaveProperty('errorMessage');
-  });
 });

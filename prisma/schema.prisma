@@ -1,21 +1,55 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
-  
 }
 
-model User{
-    id Int @id @default(autoincrement())
-    userName String @unique
-    password String 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model User {
+  id        Int        @id @default(autoincrement())
+  userName  String     @unique
+  password  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  role      Role?      @default(USER)
+  calendar  Calendar[] @relation()
+  paramsId  Int?       @default(1)
+  params    Params?    @relation(fields: [paramsId], references: [id])
+}
+
+model Calendar {
+  id            Int        @id @default(autoincrement())
+  userId        Int
+  title         String
+  description   String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  openDates     DateTime[]
+  reservedDates DateTime[]
+  timeRequired  TimeReq
+  user          User       @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  USER
+  FUNCTIONARY
+}
+
+enum TimeReq {
+  QUARTER_HOUR
+  HALF_HOUR
+  TREE_QUARTERS_HOUR
+  HOUR
+}
+
+model Params {
+  id        Int    @id @default(autoincrement())
+  user      User[] @relation()
+  userId    Int?
+  openTime  Int
+  closeTime Int
 }

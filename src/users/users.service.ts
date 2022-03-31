@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { IUserS, IUserApiResp } from '../models/user';
+import { IUser, IUserApiResp, IUserRequest } from '../types/User.types';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { generateToken } from '../utils/jwt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /* 
+    Get all users
+  */
   async getAllUsers(): Promise<IUserApiResp> {
     const users = await this.prisma.user.findMany({
       select: {
@@ -21,7 +23,10 @@ export class UsersService {
     return { data: users };
   }
 
-  async createUser(userData: IUserS): Promise<IUserApiResp> {
+  /* 
+    Create new user
+  */
+  async createUser(userData: IUserRequest): Promise<IUserApiResp> {
     const { password } = userData;
     const hasedPassword = await bcrypt.hash(password, 10);
     userData.password = hasedPassword;
@@ -32,12 +37,16 @@ export class UsersService {
         id: true,
         updatedAt: true,
         userName: true,
+        calendar: true,
       },
     });
     return { data: user };
   }
 
-  async login(userData: IUserS): Promise<IUserApiResp> {
+  /* 
+    find user by user name and compare the password
+  */
+  async findOne(userName: string, password: string): Promise<IUserApiResp> {
     const user = await this.prisma.user.findUnique({
       select: {
         createdAt: true,
@@ -47,23 +56,63 @@ export class UsersService {
         password: true,
       },
       where: {
-        userName: userData.userName,
+        userName: userName,
       },
     });
-    if (await bcrypt.compare(userData.password, user.password)) {
-      const res = {
-        id: user.id,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        userName: user.userName,
-      };
-      const header = await generateToken(res);
-      return { header, data: res };
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const { password, ...res } = user;
+      return { data: res };
     } else {
       return {
         data: null,
         err: { hasError: true, errorMessage: 'Invalid Password!' },
       };
     }
+  }
+
+  /*
+    Find user by id
+  */
+  async findById(id: number) {
+    const user = await this.prisma.user.findUnique({
+      select: {
+        createdAt: true,
+        calendar: false,
+        id: true,
+        params: false,
+        role: false,
+        updatedAt: true,
+        paramsId: false,
+        userName: true,
+        password: false,
+      },
+      where: {
+        id,
+      },
+    });
+    return user;
+  }
+
+  /*
+    Find user role by username
+  */
+  async getUserRole(userName: string) {
+    const user = await this.prisma.user.findUnique({
+      select: {
+        createdAt: false,
+        id: false,
+        updatedAt: false,
+        userName: false,
+        password: false,
+        role: true,
+      },
+      where: {
+        userName: userName,
+      },
+    });
+    if (!user) {
+      return null;
+    }
+    return user;
   }
 }
