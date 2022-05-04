@@ -1,18 +1,60 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
+import { UsersService } from '../users/users.service';
+import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../prisma/prisma.service';
+import * as dotenv from 'dotenv';
+import { IUser } from '../types/User.types';
+
+dotenv.config();
+
+const secret = process.env.JWT_SECRET;
 
 describe('AuthService', () => {
-  let service: AuthService;
+  let authService: AuthService;
+  let userService: UsersService;
+  let jwtService: JwtService;
+  let prismaService: PrismaService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService],
-    }).compile();
-
-    service = module.get<AuthService>(AuthService);
+  beforeEach(() => {
+    prismaService = new PrismaService();
+    userService = new UsersService(prismaService);
+    jwtService = new JwtService({
+      secret: secret,
+      signOptions: { expiresIn: '60s' },
+    });
+    authService = new AuthService(userService, jwtService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('test validate User', () => {
+    it('should be defined', () => {
+      expect(authService).toBeDefined();
+    });
+    it('should be return an valid user', async () => {
+      const result = {
+        createdAt: new Date('2022-04-02T02:35:50.273Z'),
+        id: 3,
+        updatedAt: new Date('2022-04-02T02:37:28.985Z'),
+        userName: 'teste@dan.com',
+      };
+      const call: IUser = await authService.validateUser(
+        'teste@dan.com',
+        'teste123',
+      );
+      expect(call).toStrictEqual(result);
+    });
+    it('should return a new acces_token', async () => {
+      const user = {
+        createdAt: new Date('2022-03-30T17:23:58.991Z'),
+        id: 17,
+        updatedAt: new Date('2022-03-30T17:23:58.993Z'),
+        userName: 'teste@dan.com',
+      };
+      expect(await authService.login(user)).toHaveProperty('access_token');
+    });
+  });
+  it('should return null since user is not in the database', async () => {
+    expect(await authService.validateUser('teste@dan1.com', 'teste123')).toBe(
+      null,
+    );
   });
 });
