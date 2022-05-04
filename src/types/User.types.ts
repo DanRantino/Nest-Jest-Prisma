@@ -30,3 +30,11 @@ export interface IUserApiResp {
     errorMessage: string;
   };
 }
+
+export interface ApiResp<T> {
+  data?: T | T[] | null;
+  err?: {
+    hasError: boolean;
+    errorMessage: string;
+  };
+}

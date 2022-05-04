@@ -13,8 +13,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   async onSave(app: INestApplication) {
-    this.onSave = async () => {
-      console.log('Saving database');
-    };
+    const ret = await this.onSave(app);
   }
 }

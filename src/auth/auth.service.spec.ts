@@ -3,7 +3,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as dotenv from 'dotenv';
-import { IUserR } from '../models/user';
+import { IUser } from '../types/User.types';
 
 dotenv.config();
 
@@ -31,12 +31,12 @@ describe('AuthService', () => {
     });
     it('should be return an valid user', async () => {
       const result = {
-        createdAt: new Date('2022-03-30T17:23:58.991Z'),
-        id: 17,
-        updatedAt: new Date('2022-03-30T17:23:58.993Z'),
+        createdAt: new Date('2022-04-02T02:35:50.273Z'),
+        id: 3,
+        updatedAt: new Date('2022-04-02T02:37:28.985Z'),
         userName: 'teste@dan.com',
       };
-      const call: IUserR = await authService.validateUser(
+      const call: IUser = await authService.validateUser(
         'teste@dan.com',
         'teste123',
       );

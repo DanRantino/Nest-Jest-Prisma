@@ -3,7 +3,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Role } from '../enums/role.enum';
 import { Roles } from '../decorator/roles.decorateor';
 import { AdminService } from './admin.service';
-import { IUser } from 'src/types/User.types';
+import { ApiResp, IUser } from '../types/User.types';
+import { ICalendar } from '../types/Calendar.types';
 
 @UseGuards(JwtAuthGuard)
 @Controller('admin')
@@ -20,8 +21,8 @@ export class AdminController {
   @Post(':id')
   async addCalendar(
     @Param('id') id: string,
-    @Body() calendar: IUser['calendar'],
-  ) {
+    @Body() calendar: ICalendar[],
+  ): Promise<ApiResp<ICalendar>> {
     return await this.adminService.addCalendar(parseInt(id, 10), calendar);
   }
 }

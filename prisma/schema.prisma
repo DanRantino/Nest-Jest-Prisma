@@ -23,7 +23,9 @@ model User {
 model Calendar {
   id            Int        @id @default(autoincrement())
   userId        Int
-  title         String
+  month         Int?
+  year          Int?
+  title         Months
   description   String
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
@@ -31,6 +33,21 @@ model Calendar {
   reservedDates DateTime[]
   timeRequired  TimeReq
   user          User       @relation(fields: [userId], references: [id])
+}
+
+enum Months {
+  JANUARY
+  FEBRUARY
+  MARCH
+  APRIL
+  MAY
+  JUNE
+  JULY
+  AUGUST
+  SEPTEMBER
+  OCTOBER
+  NOVEMBER
+  DECEMBER
 }
 
 enum Role {

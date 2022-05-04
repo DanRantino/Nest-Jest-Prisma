@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Calendar } from '@prisma/client';
-import { IUserApiResp } from 'src/types/User.types';
+import { ICalendar } from '../types/Calendar.types';
+import { ApiResp, IUserApiResp } from '../types/User.types';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -38,20 +39,36 @@ export class AdminService {
     add calendar to an user
   */
 
-  async addCalendar(userId: number, calendar: Calendar[]): Promise<any> {
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: { calendar: { create: calendar } },
-      select: {
-        calendar: true,
-        id: true,
-        password: false,
-        userName: true,
-        role: true,
-        params: false,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+  async addCalendar(
+    userId: number,
+    calendar: ICalendar[],
+  ): Promise<ApiResp<ICalendar>> {
+    let retCalendar;
+    try {
+      retCalendar = await this.prisma.user.update({
+        where: { id: userId },
+        data: { calendar: { create: calendar } },
+        select: {
+          calendar: true,
+          id: true,
+          password: false,
+          userName: true,
+          role: true,
+          params: false,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+    } catch (e) {
+      console.log(e);
+      return {
+        err: {
+          hasError: true,
+          errorMessage: 'Error adding calendar',
+        },
+      };
+    }
+    console.log(retCalendar);
+    return { data: retCalendar.calendar };
   }
 }

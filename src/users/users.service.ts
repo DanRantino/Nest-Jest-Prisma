@@ -87,7 +87,7 @@ export class UsersService {
         password: false,
       },
       where: {
-        id,
+        id: Number(id),
       },
     });
     return user;
